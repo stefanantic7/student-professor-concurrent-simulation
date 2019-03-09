@@ -24,7 +24,8 @@ public class Student implements Runnable {
         AtomicReference<String> arrivalTime = new AtomicReference<>(Main.getCurrentTimeStamp());
         AtomicReference<String> startedTime = new AtomicReference<>();
 
-        while(!this.finished) {
+        // moraom da imam i ovaj flag running. Moze da se desi da shutdownNow ne ugasi sve, jer su se hendlovali ti interapti.
+        while(!this.finished && Main.running.get()) {
             //If professor is available
             if(this.professor.getSemaphore().tryAcquire()) {
                 try {
@@ -35,7 +36,8 @@ public class Student implements Runnable {
                 } catch (InterruptedException e) {
                     if(this.professor.getStartDefenseBarrier().isBroken()) {
                         //Nije ni poceo, a prekinut je
-                        this.professor.getSemaphore().release();
+                        break;
+//                        this.professor.getSemaphore().release();
                     }
                     else {
                         //Poceo je, ali je zvonilo
@@ -69,14 +71,18 @@ public class Student implements Runnable {
 
         }
 
-        System.out.println(String.format("Thread: %s Arrival: %s Prof: %s TTC: %d ms:%s Score: %d",
-                Thread.currentThread().getName(),
-                arrivalTime.get(),
-                this.teacherThreadName,
-                this.defenseDurationMills,
-                startedTime.get(),
-                this.rate
-        ));
+        if(this.finished) {
+            Main.sumOfRates.addAndGet(this.rate);
+
+            System.out.println(String.format("Thread: %s Arrival: %s Prof: %s TTC: %d ms:%s Score: %d",
+                    Thread.currentThread().getName(),
+                    arrivalTime.get(),
+                    this.teacherThreadName,
+                    this.defenseDurationMills,
+                    startedTime.get(),
+                    this.rate
+            ));
+        }
     }
 
     private void finish(Teacher teacher) throws InterruptedException {

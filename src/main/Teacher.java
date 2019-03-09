@@ -40,6 +40,7 @@ public abstract class Teacher implements Runnable {
 
     @Override
     public void run() {
+        Thread.currentThread().setName(this.getClass().getSimpleName()+"-thread");
         this.threadName = Thread.currentThread().getName();
         try {
             Thread.sleep(this.startAfterMilliseconds);
@@ -57,14 +58,16 @@ public abstract class Teacher implements Runnable {
         }
 
         System.out.println(this.getClass().getSimpleName()+" is ready");
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        this.running.set(false);
 
+        while(this.running.get()) {
+            //working
+        }
+
+    }
+
+    public synchronized void stop()
+    {
+        this.running.set(false);
     }
 
 
