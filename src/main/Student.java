@@ -1,6 +1,7 @@
 package main;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Student implements Runnable {
 
@@ -17,11 +18,18 @@ public class Student implements Runnable {
 
     @Override
     public void run() {
+        AtomicReference<String> arrivalTime = new AtomicReference<>(Main.getCurrentTimeStamp());
+        String teacherThreadName = null;
+        AtomicReference<String> startedTime = new AtomicReference<>();
+
+
         while(!this.finished) {
             //If professor is available
             if(this.professor.getSemaphore().tryAcquire()) {
                 try {
                     this.professor.getStartDefenseBarrier().await(1000, TimeUnit.MILLISECONDS);
+                    startedTime.set(Main.getCurrentTimeStamp());
+                    teacherThreadName = this.professor.getThreadName();
                     Thread.sleep(defenseDurationMills);
                     this.finished = true;
                     //TODO: oceni me
@@ -34,7 +42,6 @@ public class Student implements Runnable {
                     this.professor.resetDefenseLatch();
                     //oslobodi semafor
                     this.professor.getSemaphore().release();
-                    System.out.println("student zavrsio kod profesora");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (BrokenBarrierException e) {
@@ -46,11 +53,12 @@ public class Student implements Runnable {
             }
             if (!this.finished && this.assistant.getSemaphore().tryAcquire() ) {
                 try {
+                    startedTime.set(Main.getCurrentTimeStamp());
+                    teacherThreadName = this.assistant.getThreadName();
                     Thread.sleep(defenseDurationMills);
                     this.finished = true;
                     //TODO: oceni me
                     this.assistant.getSemaphore().release();
-                    System.out.println("student zavrsio kod asistenta");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -58,6 +66,13 @@ public class Student implements Runnable {
 
         }
 
-        System.out.println("Student kraj");
+        System.out.println(String.format("Thread: %s Arrival: %s Prof: %s TTC: %d ms:%s Score: %d",
+                Thread.currentThread().getName(),
+                arrivalTime.get(),
+                teacherThreadName,
+                this.defenseDurationMills,
+                startedTime.get(),
+                10 //TODO: change this
+        ));
     }
 }
