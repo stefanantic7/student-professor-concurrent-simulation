@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -11,6 +12,8 @@ public abstract class Teacher implements Runnable {
     private AtomicBoolean running;
     private String threadName;
 
+    private Random random;
+
     public Teacher(CountDownLatch teacherReadyLatch, int startAfterMilliseconds, int maxStudents) {
         this.teacherReadyLatch = teacherReadyLatch;
         this.startAfterMilliseconds = startAfterMilliseconds;
@@ -19,6 +22,8 @@ public abstract class Teacher implements Runnable {
 
         this.running = new AtomicBoolean();
         this.threadName = Thread.currentThread().getName();
+
+        this.random = new Random();
     }
 
     public Semaphore getSemaphore() {
@@ -27,6 +32,10 @@ public abstract class Teacher implements Runnable {
 
     public String getThreadName() {
         return threadName;
+    }
+
+    public int rateStudent() {
+        return random.nextInt(10)+1;
     }
 
     @Override
