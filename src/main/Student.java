@@ -54,7 +54,7 @@ public class Student implements Runnable {
                     this.professor.getSemaphore().release();
                 }
             }
-            if (!this.finished && this.assistant.getSemaphore().tryAcquire() ) {
+            if (!this.finished && this.assistant.getSemaphore().tryAcquire() && Main.running.get()) {
                 try {
                     startedTime.set(Main.getCurrentTimeStamp());
                     Thread.sleep(defenseDurationMills);
