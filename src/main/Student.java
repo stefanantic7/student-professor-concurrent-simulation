@@ -95,7 +95,7 @@ public class Student implements Runnable {
             //cekaj drugi da zavrsi.
             this.professor.getDefenseLatch().await();
             //restartuj barijeru
-            this.professor.getStartDefenseBarrier().reset();
+//            this.professor.getStartDefenseBarrier().reset(); // Barijera se sama resetuje
             //vrati latch, posle barijere, da ne bi neko uleteo dok ovaj drugi ne oslobodi semafor
             this.professor.resetDefenseLatch();
         }
